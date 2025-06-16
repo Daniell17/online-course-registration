@@ -1,7 +1,7 @@
-const { pool } = require('../config/database').default;
+const { pool } = require('../config/database');
 
 const enrollmentController = {
-    // GET /api/enrollments
+    // /api/enrollments
     getAllEnrollments: async (req, res) => {
         try {
             const [rows] = await pool.execute(`
@@ -28,7 +28,7 @@ const enrollmentController = {
         }
     },
 
-    // PUT /api/enrollments/:id/status
+    // /api/enrollments/:id/status
     updateEnrollmentStatus: async (req, res) => {
         try {
             const { status, grade } = req.body;
@@ -67,7 +67,7 @@ const enrollmentController = {
         }
     },
 
-    // DELETE /api/enrollments/:id
+    // /api/enrollments/:id
     deleteEnrollment: async (req, res) => {
         try {
             const [result] = await pool.execute(`

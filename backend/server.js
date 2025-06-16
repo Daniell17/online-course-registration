@@ -4,7 +4,7 @@ const helmet = require('helmet');
 const morgan = require('morgan');
 require('dotenv').config();
 
-const { testConnection } = require('./config/database').default;
+const { testConnection } = require('./config/database');
 const apiRoutes = require('./routes/api');
 
 const app = express();

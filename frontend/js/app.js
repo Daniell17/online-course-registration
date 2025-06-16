@@ -1,14 +1,17 @@
-// Application state and UI management
-
 let currentStudents = [];
 let currentCourses = [];
 let currentEnrollments = [];
+let filteredStudents = [];
 
-// Initialize the application
 document.addEventListener('DOMContentLoaded', async () => {
     console.log('Initializing Course Registration System...');
     
     try {
+        // Initialize student manager modals first
+        if (typeof studentManager !== 'undefined') {
+            studentManager.initializeModals();
+        }
+        
         await loadDashboardStats();
         await loadStudents();
         await loadCourses();
@@ -34,7 +37,7 @@ async function loadDashboardStats() {
         
     } catch (error) {
         console.error('Error loading dashboard stats:', error);
-        // Set default values if API fails
+        // vendos vlera default ne qofse API nuk funksionon
         document.getElementById('totalStudents').textContent = '-';
         document.getElementById('activeCourses').textContent = '-';
         document.getElementById('totalEnrollments').textContent = '-';
@@ -42,12 +45,13 @@ async function loadDashboardStats() {
     }
 }
 
-// Student management functions
 async function loadStudents() {
     try {
         const response = await api.getStudents();
         currentStudents = response.data;
+        filteredStudents = [...currentStudents];
         renderStudentsTable();
+        updateStudentCount();
     } catch (error) {
         console.error('Error loading students:', error);
         showAlert('Failed to load students', 'danger');
@@ -58,26 +62,62 @@ function renderStudentsTable() {
     const tbody = document.getElementById('studentsTableBody');
     tbody.innerHTML = '';
     
-    currentStudents.forEach(student => {
+    if (filteredStudents.length === 0) {
+        tbody.innerHTML = `
+            <tr>
+                <td colspan="8" class="text-center text-muted py-4">
+                    <i class="fas fa-users fa-3x mb-3"></i>
+                    <div>No students found</div>
+                </td>
+            </tr>
+        `;
+        return;
+    }
+    
+    filteredStudents.forEach(student => {
         const row = document.createElement('tr');
+        row.className = 'student-row';
         row.innerHTML = `
-            <td>${student.student_id}</td>
-            <td>${student.full_name}</td>
-            <td>${student.email}</td>
-            <td>${student.phone || 'N/A'}</td>
-            <td><span class="badge bg-${getStatusColor(student.student_status)}">${student.student_status}</span></td>
-            <td>${student.total_enrollments}</td>
-            <td>${student.gpa ? student.gpa.toFixed(2) : 'N/A'}</td>
+            <td><span class="badge bg-light text-dark">${student.student_id}</span></td>
             <td>
-                <button class="btn btn-sm btn-outline-primary" onclick="viewStudent(${student.student_id})">
-                    <i class="fas fa-eye"></i>
-                </button>
-                <button class="btn btn-sm btn-outline-warning" onclick="editStudent(${student.student_id})">
-                    <i class="fas fa-edit"></i>
-                </button>
-                <button class="btn btn-sm btn-outline-danger" onclick="deleteStudent(${student.student_id})">
-                    <i class="fas fa-trash"></i>
-                </button>
+                <div class="d-flex align-items-center">
+                    <div class="avatar-circle me-2">${getInitials(student.full_name)}</div>
+                    <div>
+                        <div class="fw-bold">${student.full_name}</div>
+                        <small class="text-muted">ID: ${student.student_id}</small>
+                    </div>
+                </div>
+            </td>
+            <td>
+                <i class="fas fa-envelope text-primary me-1"></i>
+                ${student.email}
+            </td>
+            <td>
+                <i class="fas fa-phone text-success me-1"></i>
+                ${student.phone || 'N/A'}
+            </td>
+            <td><span class="badge bg-${getStatusColor(student.student_status)}">${student.student_status}</span></td>
+            <td>
+                <span class="badge bg-info">${student.total_enrollments}</span>
+                <small class="text-muted d-block">Active: ${student.active_enrollments}</small>
+            </td>
+            <td>
+                <span class="${student.gpa ? getGPAColor(student.gpa) : 'text-muted'} fw-bold">
+                    ${student.gpa ? student.gpa.toFixed(2) : 'N/A'}
+                </span>
+            </td>
+            <td>
+                <div class="btn-group" role="group">
+                    <button class="btn btn-sm btn-outline-primary" onclick="viewStudent(${student.student_id})" title="View Details">
+                        <i class="fas fa-eye"></i>
+                    </button>
+                    <button class="btn btn-sm btn-outline-warning" onclick="editStudent(${student.student_id})" title="Edit Student">
+                        <i class="fas fa-edit"></i>
+                    </button>
+                    <button class="btn btn-sm btn-outline-danger" onclick="deleteStudent(${student.student_id})" title="Delete Student">
+                        <i class="fas fa-trash"></i>
+                    </button>
+                </div>
             </td>
         `;
         tbody.appendChild(row);
@@ -102,25 +142,35 @@ function renderCoursesTable() {
     
     currentCourses.forEach(course => {
         const row = document.createElement('tr');
+        row.className = 'course-row';
         row.innerHTML = `
-            <td><strong>${course.course_code}</strong></td>
-            <td>${course.course_name}</td>
+            <td><span class="badge bg-dark">${course.course_code}</span></td>
+            <td>
+                <div class="fw-bold">${course.course_name}</div>
+                <small class="text-muted">${course.description ? course.description.substring(0, 50) + '...' : 'No description'}</small>
+            </td>
             <td><span class="badge bg-secondary">${course.category || 'General'}</span></td>
-            <td>${course.credits}</td>
-            <td>$${course.price}</td>
+            <td><span class="badge bg-info">${course.credits}</span></td>
+            <td><span class="text-success fw-bold">$${course.price}</span></td>
             <td>${course.max_students}</td>
-            <td>${course.available_spots}</td>
+            <td>
+                <span class="badge ${course.available_spots > 0 ? 'bg-success' : 'bg-danger'}">
+                    ${course.available_spots}
+                </span>
+            </td>
             <td><span class="badge bg-${getStatusColor(course.status)}">${course.status}</span></td>
             <td>
-                <button class="btn btn-sm btn-outline-primary" onclick="viewCourse(${course.course_id})">
-                    <i class="fas fa-eye"></i>
-                </button>
-                <button class="btn btn-sm btn-outline-success" onclick="showEnrollmentModal(${course.course_id})">
-                    <i class="fas fa-user-plus"></i>
-                </button>
-                <button class="btn btn-sm btn-outline-warning" onclick="editCourse(${course.course_id})">
-                    <i class="fas fa-edit"></i>
-                </button>
+                <div class="btn-group" role="group">
+                    <button class="btn btn-sm btn-outline-primary" onclick="viewCourse(${course.course_id})" title="View Course">
+                        <i class="fas fa-eye"></i>
+                    </button>
+                    <button class="btn btn-sm btn-outline-success" onclick="showEnrollmentModal(${course.course_id})" title="Enroll Students">
+                        <i class="fas fa-user-plus"></i>
+                    </button>
+                    <button class="btn btn-sm btn-outline-warning" onclick="editCourse(${course.course_id})" title="Edit Course">
+                        <i class="fas fa-edit"></i>
+                    </button>
+                </div>
             </td>
         `;
         tbody.appendChild(row);
@@ -146,11 +196,23 @@ function renderEnrollmentsTable() {
     currentEnrollments.forEach(enrollment => {
         const row = document.createElement('tr');
         row.innerHTML = `
-            <td>${enrollment.student_name}</td>
-            <td>${enrollment.course_name} (${enrollment.course_code})</td>
+            <td>
+                <div class="d-flex align-items-center">
+                    <div class="avatar-circle-sm me-2">${getInitials(enrollment.student_name)}</div>
+                    ${enrollment.student_name}
+                </div>
+            </td>
+            <td>
+                <div class="fw-bold">${enrollment.course_name}</div>
+                <small class="text-muted">(${enrollment.course_code})</small>
+            </td>
             <td>${new Date(enrollment.enrollment_date).toLocaleDateString()}</td>
             <td><span class="badge bg-${getStatusColor(enrollment.status)}">${enrollment.status}</span></td>
-            <td>${enrollment.grade ? enrollment.grade.toFixed(2) : 'N/A'}</td>
+            <td>
+                <span class="${enrollment.grade ? getGPAColor(enrollment.grade) : 'text-muted'} fw-bold">
+                    ${enrollment.grade ? enrollment.grade.toFixed(2) : 'N/A'}
+                </span>
+            </td>
             <td>
                 <button class="btn btn-sm btn-outline-primary" onclick="updateEnrollmentStatus(${enrollment.enrollment_id})">
                     <i class="fas fa-edit"></i> Update
@@ -161,6 +223,41 @@ function renderEnrollmentsTable() {
     });
 }
 
+// Filter and search functions
+function filterStudents() {
+    const searchTerm = document.getElementById('studentSearchInput')?.value.toLowerCase() || '';
+    const statusFilter = document.getElementById('studentStatusFilter')?.value || '';
+
+    filteredStudents = currentStudents.filter(student => {
+        const matchesSearch = !searchTerm || 
+            student.full_name.toLowerCase().includes(searchTerm) ||
+            student.email.toLowerCase().includes(searchTerm) ||
+            student.student_id.toString().includes(searchTerm);
+        
+        const matchesStatus = !statusFilter || student.student_status === statusFilter;
+        
+        return matchesSearch && matchesStatus;
+    });
+
+    renderStudentsTable();
+    updateStudentCount();
+}
+
+function clearStudentFilters() {
+    document.getElementById('studentSearchInput').value = '';
+    document.getElementById('studentStatusFilter').value = '';
+    filteredStudents = [...currentStudents];
+    renderStudentsTable();
+    updateStudentCount();
+}
+
+function updateStudentCount() {
+    const countElement = document.getElementById('studentCount');
+    if (countElement) {
+        countElement.textContent = `Showing ${filteredStudents.length} of ${currentStudents.length} students`;
+    }
+}
+
 // Utility functions
 function getStatusColor(status) {
     const colorMap = {
@@ -169,17 +266,35 @@ function getStatusColor(status) {
         'Enrolled': 'primary',
         'Completed': 'success',
         'Dropped': 'danger',
-        'Failed': 'danger'
+        'Failed': 'danger',
+        'Graduated': 'warning',
+        'Suspended': 'dark'
     };
     return colorMap[status] || 'secondary';
+}
+
+function getGPAColor(gpa) {
+    if (gpa >= 3.5) return 'text-success';
+    if (gpa >= 3.0) return 'text-info';
+    if (gpa >= 2.5) return 'text-warning';
+    return 'text-danger';
+}
+
+function getInitials(name) {
+    return name.split(' ')
+        .map(word => word.charAt(0))
+        .join('')
+        .toUpperCase()
+        .substring(0, 2);
 }
 
 function showAlert(message, type = 'info') {
     const alertContainer = document.getElementById('alertContainer') || createAlertContainer();
     
     const alert = document.createElement('div');
-    alert.className = `alert alert-${type} alert-dismissible fade show`;
+    alert.className = `alert alert-${type} alert-dismissible fade show shadow-sm`;
     alert.innerHTML = `
+        <i class="fas fa-${getAlertIcon(type)} me-2"></i>
         ${message}
         <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
     `;
@@ -194,6 +309,16 @@ function showAlert(message, type = 'info') {
     }, 5000);
 }
 
+function getAlertIcon(type) {
+    const iconMap = {
+        'success': 'check-circle',
+        'danger': 'exclamation-circle',
+        'warning': 'exclamation-triangle',
+        'info': 'info-circle'
+    };
+    return iconMap[type] || 'info-circle';
+}
+
 function createAlertContainer() {
     const container = document.createElement('div');
     container.id = 'alertContainer';
@@ -206,54 +331,34 @@ function createAlertContainer() {
     return container;
 }
 
-// Placeholder functions for modal operations
-function showAddStudentModal() {
-    showAlert('Add Student modal - Feature coming soon!', 'info');
-}
-
-function showAddCourseModal() {
-    showAlert('Add Course modal - Feature coming soon!', 'info');
-}
-
-function viewStudent(id) {
-    showAlert(`View Student ${id} - Feature coming soon!`, 'info');
-}
-
-function editStudent(id) {
-    showAlert(`Edit Student ${id} - Feature coming soon!`, 'info');
-}
-
-function deleteStudent(id) {
-    if (confirm('Are you sure you want to delete this student?')) {
-        showAlert(`Delete Student ${id} - Feature coming soon!`, 'warning');
-    }
-}
-
-function viewCourse(id) {
-    showAlert(`View Course ${id} - Feature coming soon!`, 'info');
-}
-
-function editCourse(id) {
-    showAlert(`Edit Course ${id} - Feature coming soon!`, 'info');
-}
-
-function showEnrollmentModal(courseId) {
-    showAlert(`Enroll students in Course ${courseId} - Feature coming soon!`, 'info');
-}
-
-function updateEnrollmentStatus(enrollmentId) {
-    showAlert(`Update Enrollment ${enrollmentId} - Feature coming soon!`, 'info');
-}
-
 // Refresh functions
+async function refreshStudents() {
+    await loadStudents();
+    await loadDashboardStats();
+    showAlert('Students data refreshed successfully!', 'success');
+}
+
 async function refreshAll() {
     try {
         await loadDashboardStats();
         await loadStudents();
         await loadCourses();
         await loadEnrollments();
-        showAlert('Data refreshed successfully!', 'success');
+        showAlert('All data refreshed successfully!', 'success');
     } catch (error) {
         showAlert('Failed to refresh data', 'danger');
     }
 }
+
+// Simple fallback function for showAddStudentModal
+function showAddStudentModal() {
+    const modalElement = document.getElementById('studentModal');
+    if (modalElement) {
+        const modal = new bootstrap.Modal(modalElement);
+        modal.show();
+    } else {
+        console.error('Student modal element not found');
+    }
+}
+
+// Placeholder functions (now removed since we have the actual student manager)

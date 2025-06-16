@@ -1,5 +1,3 @@
--- OPERACIONET UPDATE - Perditesimi i te dhenave ekzistuese
-
 -- Perditeso numrin e telefonit te studentit
 UPDATE Students 
 SET phone = '+1234567899' 

@@ -2,15 +2,53 @@
 class StudentManager {
     constructor() {
         this.currentStudent = null;
+        this.modal = null;
+        this.detailsModal = null;
+        // Don't initialize modals in constructor
+    }
+
+    // Initialize modals when DOM is ready
+    initializeModals() {
+        const studentModalElement = document.getElementById('studentModal');
+        const detailsModalElement = document.getElementById('studentDetailsModal');
+        
+        if (studentModalElement) {
+            this.modal = new bootstrap.Modal(studentModalElement, {
+                backdrop: true,
+                keyboard: true,
+                focus: true
+            });
+            
+            studentModalElement.addEventListener('hidden.bs.modal', () => {
+                this.resetForm();
+            });
+        }
+        
+        if (detailsModalElement) {
+            this.detailsModal = new bootstrap.Modal(detailsModalElement, {
+                backdrop: true,
+                keyboard: true,
+                focus: true
+            });
+        }
     }
 
     // Show add student modal
     showAddModal() {
+        // Initialize modals if not already done
+        if (!this.modal) {
+            this.initializeModals();
+        }
+        
         this.currentStudent = null;
-        document.getElementById('studentModalTitle').textContent = 'Add New Student';
-        document.getElementById('studentForm').reset();
-        const modal = new bootstrap.Modal(document.getElementById('studentModal'));
-        modal.show();
+        document.getElementById('studentModalLabel').textContent = 'Add New Student';
+        this.resetForm();
+        
+        if (this.modal) {
+            this.modal.show();
+        } else {
+            console.error('Could not initialize modal');
+        }
     }
 
     // Show edit student modal
@@ -19,26 +57,42 @@ class StudentManager {
             const response = await api.getStudent(studentId);
             this.currentStudent = response.data;
             
-            document.getElementById('studentModalTitle').textContent = 'Edit Student';
+            document.getElementById('studentModalLabel').textContent = 'Edit Student';
             this.populateForm(this.currentStudent);
             
-            const modal = new bootstrap.Modal(document.getElementById('studentModal'));
-            modal.show();
+            if (this.modal) {
+                this.modal.show();
+            }
         } catch (error) {
             showAlert('Failed to load student data', 'danger');
             console.error('Error loading student:', error);
         }
     }
 
+    // Reset form
+    resetForm() {
+        const form = document.getElementById('studentForm');
+        if (form) {
+            form.reset();
+        }
+    }
+
     // Populate form with student data
     populateForm(student) {
-        document.getElementById('firstName').value = student.first_name || '';
-        document.getElementById('middleName').value = student.middle_name || '';
-        document.getElementById('lastName').value = student.last_name || '';
-        document.getElementById('email').value = student.email || '';
-        document.getElementById('phone').value = student.phone || '';
-        document.getElementById('dateOfBirth').value = student.date_of_birth || '';
-        document.getElementById('studentStatus').value = student.student_status || 'Active';
+        const setFieldValue = (id, value) => {
+            const field = document.getElementById(id);
+            if (field) {
+                field.value = value || '';
+            }
+        };
+
+        setFieldValue('firstName', student.first_name);
+        setFieldValue('middleName', student.middle_name);
+        setFieldValue('lastName', student.last_name);
+        setFieldValue('email', student.email);
+        setFieldValue('phone', student.phone);
+        setFieldValue('dateOfBirth', student.date_of_birth);
+        setFieldValue('studentStatus', student.student_status || 'Active');
     }
 
     // Save student (create or update)
@@ -62,8 +116,9 @@ class StudentManager {
             }
 
             // Close modal and refresh table
-            const modal = bootstrap.Modal.getInstance(document.getElementById('studentModal'));
-            modal.hide();
+            if (this.modal) {
+                this.modal.hide();
+            }
             
             await loadStudents();
             await loadDashboardStats();
@@ -76,14 +131,19 @@ class StudentManager {
 
     // Get form data
     getFormData() {
+        const getFieldValue = (id) => {
+            const field = document.getElementById(id);
+            return field ? field.value.trim() : '';
+        };
+
         return {
-            firstName: document.getElementById('firstName').value.trim(),
-            middleName: document.getElementById('middleName').value.trim(),
-            lastName: document.getElementById('lastName').value.trim(),
-            email: document.getElementById('email').value.trim(),
-            phone: document.getElementById('phone').value.trim(),
-            dateOfBirth: document.getElementById('dateOfBirth').value || null,
-            status: document.getElementById('studentStatus').value
+            firstName: getFieldValue('firstName'),
+            middleName: getFieldValue('middleName'),
+            lastName: getFieldValue('lastName'),
+            email: getFieldValue('email'),
+            phone: getFieldValue('phone'),
+            dateOfBirth: getFieldValue('dateOfBirth') || null,
+            status: getFieldValue('studentStatus')
         };
     }
 
@@ -91,18 +151,22 @@ class StudentManager {
     validateForm(formData) {
         if (!formData.firstName) {
             showAlert('First name is required', 'warning');
+            document.getElementById('firstName').focus();
             return false;
         }
         if (!formData.lastName) {
             showAlert('Last name is required', 'warning');
+            document.getElementById('lastName').focus();
             return false;
         }
         if (!formData.email) {
             showAlert('Email is required', 'warning');
+            document.getElementById('email').focus();
             return false;
         }
         if (!this.isValidEmail(formData.email)) {
             showAlert('Please enter a valid email address', 'warning');
+            document.getElementById('email').focus();
             return false;
         }
         return true;
@@ -283,7 +347,15 @@ class StudentManager {
 // Create global student manager instance
 const studentManager = new StudentManager();
 
-// Update global functions to use the student manager
+// Initialize student manager but don't create modals yet
+const studentManager = new StudentManager();
+
+// Initialize modals when DOM is loaded
+document.addEventListener('DOMContentLoaded', () => {
+    studentManager.initializeModals();
+});
+
+// Global functions that use the student manager
 function showAddStudentModal() {
     studentManager.showAddModal();
 }
@@ -308,4 +380,17 @@ function saveStudent() {
 
 function generateTranscript(studentId) {
     studentManager.generateTranscript(studentId);
+}
+
+// Additional helper functions
+function closeStudentModal() {
+    if (studentManager.modal) {
+        studentManager.modal.hide();
+    }
+}
+
+function closeStudentDetailsModal() {
+    if (studentManager.detailsModal) {
+        studentManager.detailsModal.hide();
+    }
 }

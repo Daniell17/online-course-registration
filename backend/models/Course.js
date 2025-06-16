@@ -1,27 +1,39 @@
-const { pool } = require('../config/database').default;
+const { pool } = require('../config/database');
 
 class Course {
     static async findAll(filters = {}) {
-        let query = `SELECT * FROM vw_CourseCatalog WHERE 1=1`;
+        let query = `
+            SELECT c.course_id, c.course_name, c.course_code, c.description, 
+                   c.credits, c.price, c.category, c.max_students, c.start_date, 
+                   c.end_date, c.status,
+                   COUNT(e.enrollment_id) as current_enrollments,
+                   (c.max_students - COUNT(e.enrollment_id)) as available_spots
+            FROM Courses c
+            LEFT JOIN Enrollments e ON c.course_id = e.course_id AND e.status IN ('Enrolled', 'Completed')
+            WHERE 1=1
+        `;
         const params = [];
 
         if (filters.status) {
-            query += ` AND status = ?`;
+            query += ` AND c.status = ?`;
             params.push(filters.status);
         }
 
         if (filters.category) {
-            query += ` AND category = ?`;
+            query += ` AND c.category = ?`;
             params.push(filters.category);
         }
 
         if (filters.search) {
-            query += ` AND (course_name LIKE ? OR course_code LIKE ? OR description LIKE ?)`;
+            query += ` AND (c.course_name LIKE ? OR c.course_code LIKE ? OR c.description LIKE ?)`;
             const searchTerm = `%${filters.search}%`;
             params.push(searchTerm, searchTerm, searchTerm);
         }
 
-        query += ` ORDER BY course_name`;
+        query += ` GROUP BY c.course_id, c.course_name, c.course_code, c.description, 
+                           c.credits, c.price, c.category, c.max_students, c.start_date, 
+                           c.end_date, c.status
+                   ORDER BY c.course_name`;
 
         const [rows] = await pool.execute(query, params);
         return rows;
@@ -29,7 +41,17 @@ class Course {
 
     static async findById(id) {
         const [rows] = await pool.execute(`
-            SELECT * FROM vw_CourseCatalog WHERE course_id = ?
+            SELECT c.course_id, c.course_name, c.course_code, c.description, 
+                   c.credits, c.price, c.category, c.max_students, c.start_date, 
+                   c.end_date, c.status,
+                   COUNT(e.enrollment_id) as current_enrollments,
+                   (c.max_students - COUNT(e.enrollment_id)) as available_spots
+            FROM Courses c
+            LEFT JOIN Enrollments e ON c.course_id = e.course_id AND e.status IN ('Enrolled', 'Completed')
+            WHERE c.course_id = ?
+            GROUP BY c.course_id, c.course_name, c.course_code, c.description, 
+                     c.credits, c.price, c.category, c.max_students, c.start_date, 
+                     c.end_date, c.status
         `, [id]);
         return rows[0];
     }

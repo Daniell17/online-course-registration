@@ -1,10 +1,8 @@
-const { pool } = require('../config/database').default;
+const { pool } = require('../config/database');
 
 const analyticsController = {
-    // GET /api/analytics/dashboard
     getDashboard: async (req, res) => {
         try {
-            // Get basic stats
             const [stats] = await pool.execute(`
                 SELECT 
                     (SELECT COUNT(*) FROM Students) as total_students,
@@ -26,7 +24,6 @@ const analyticsController = {
         }
     },
 
-    // GET /api/analytics/revenue
     getRevenue: async (req, res) => {
         try {
             const [rows] = await pool.execute(`
@@ -48,7 +45,6 @@ const analyticsController = {
         }
     },
 
-    // GET /api/analytics/courses
     getCourseAnalytics: async (req, res) => {
         try {
             const [rows] = await pool.execute(`

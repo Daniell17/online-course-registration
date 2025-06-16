@@ -2,7 +2,7 @@ const Course = require('../models/Course');
 const { validationResult } = require('express-validator');
 
 const courseController = {
-    // GET /api/courses
+    //  /api/courses
     getAllCourses: async (req, res) => {
         try {
             const filters = {
@@ -26,7 +26,7 @@ const courseController = {
         }
     },
 
-    // GET /api/courses/:id
+    // /api/courses/:id
     getCourseById: async (req, res) => {
         try {
             const course = await Course.findById(req.params.id);

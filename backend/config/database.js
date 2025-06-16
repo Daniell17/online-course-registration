@@ -1,4 +1,4 @@
-import { createPool } from 'mysql2/promise';
+const mysql = require('mysql2/promise');
 require('dotenv').config();
 
 const dbConfig = {
@@ -8,13 +8,11 @@ const dbConfig = {
     database: process.env.DB_NAME || 'online_course_registration',
     waitForConnections: true,
     connectionLimit: 10,
-    queueLimit: 0,
-    acquireTimeout: 60000,
-    timeout: 60000
+    queueLimit: 0
 };
 
 // Create connection pool
-const pool = createPool(dbConfig);
+const pool = mysql.createPool(dbConfig);
 
 // Test database connection
 const testConnection = async () => {
@@ -28,4 +26,4 @@ const testConnection = async () => {
     }
 };
 
-export default { pool, testConnection };
+module.exports = { pool, testConnection };

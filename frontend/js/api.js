@@ -63,7 +63,10 @@ class APIClient {
         return this.request(`/students/${id}/enrollments`);
     }
 
-    // Course API methods
+    async getStudentTranscript(id) {
+        return this.request(`/students/${id}/transcript`);
+    }
+
     async getCourses(filters = {}) {
         const params = new URLSearchParams(filters);
         const endpoint = `/courses${params.toString() ? '?' + params.toString() : ''}`;
@@ -95,7 +98,6 @@ class APIClient {
         });
     }
 
-    // Enrollment API methods
     async getEnrollments() {
         return this.request('/enrollments');
     }
@@ -107,7 +109,6 @@ class APIClient {
         });
     }
 
-    // Analytics API methods
     async getDashboardStats() {
         return this.request('/analytics/dashboard');
     }
@@ -117,5 +118,4 @@ class APIClient {
     }
 }
 
-// Create global API client instance
 const api = new APIClient();

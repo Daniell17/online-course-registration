@@ -6,130 +6,240 @@
     <title>Online Course Registration System</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
-    <style>
-        .dashboard-card {
-            transition: transform 0.2s;
-        }
-        .dashboard-card:hover {
-            transform: translateY(-5px);
-        }
-        .status-badge {
-            font-size: 0.875rem;
-        }
-    </style>
+    <link href="css/styles.css" rel="stylesheet">
 </head>
 <body>
-    <nav class="navbar navbar-expand-lg navbar-dark bg-primary">
-        <div class="container">
+    <nav class="navbar navbar-expand-lg navbar-dark">
+        <div class="container-fluid">
             <a class="navbar-brand" href="#"><i class="fas fa-graduation-cap"></i> Course Registration</a>
             <div class="navbar-nav ms-auto">
                 <a class="nav-link" href="#students"><i class="fas fa-users"></i> Students</a>
                 <a class="nav-link" href="#courses"><i class="fas fa-book"></i> Courses</a>
                 <a class="nav-link" href="#analytics"><i class="fas fa-chart-bar"></i> Analytics</a>
+                <div class="nav-link">
+                    <span id="currentTime" class="text-light"></span>
+                </div>
             </div>
         </div>
     </nav>
 
+    <!-- Loading Overlay -->
+    <div id="loadingOverlay" class="position-fixed w-100 h-100 d-none" style="top: 0; left: 0; background: rgba(0,0,0,0.5); z-index: 9999;">
+        <div class="d-flex justify-content-center align-items-center h-100">
+            <div class="text-center text-white">
+                <div class="spinner-border text-primary" style="width: 3rem; height: 3rem;" role="status"></div>
+                <div class="mt-3">Loading...</div>
+            </div>
+        </div>
+    </div>
+
     <div class="container mt-4">
-        <!-- Dashboard Overview -->
+        <!-- Welcome Section -->
         <div class="row mb-4">
             <div class="col-12">
-                <h2><i class="fas fa-tachometer-alt"></i> Dashboard</h2>
+                <div class="welcome-section text-center p-4" style="background: linear-gradient(45deg, #667eea, #764ba2); border-radius: 15px; color: white; margin-bottom: 20px;">
+                    <h1><i class="fas fa-university"></i> Welcome to Course Registration System</h1>
+                    <p class="lead">Manage students, courses, and enrollments with ease</p>
+                    <div id="systemStatus" class="badge bg-success">System Online</div>
+                </div>
             </div>
         </div>
 
-        <!-- Stats Cards -->
+        <!-- Quick Actions Panel -->
+        <div class="quick-actions">
+            <h6><i class="fas fa-bolt"></i> Quick Actions</h6>
+            <button class="btn btn-sm btn-primary quick-action-btn" onclick="showAddStudentModal()">
+                <i class="fas fa-user-plus"></i> Add Student
+            </button>
+            <button class="btn btn-sm btn-success quick-action-btn" onclick="showAddCourseModal()">
+                <i class="fas fa-plus"></i> Add Course
+            </button>
+            <button class="btn btn-sm btn-info quick-action-btn" onclick="refreshAll()">
+                <i class="fas fa-sync-alt"></i> Refresh Data
+            </button>
+            <button class="btn btn-sm btn-warning quick-action-btn" onclick="showAnalytics()">
+                <i class="fas fa-chart-line"></i> View Analytics
+            </button>
+            <button class="btn btn-sm btn-secondary quick-action-btn" onclick="exportData()">
+                <i class="fas fa-download"></i> Export Data
+            </button>
+        </div>
+
+        <!-- Stats Cards with Progress -->
         <div class="row mb-4" id="statsCards">
             <div class="col-md-3">
-                <div class="card dashboard-card bg-primary text-white">
+                <div class="card dashboard-card bg-primary text-white h-100">
                     <div class="card-body">
-                        <div class="d-flex justify-content-between">
+                        <div class="d-flex justify-content-between align-items-center">
                             <div>
-                                <h5 class="card-title">Total Students</h5>
-                                <h3 id="totalStudents">-</h3>
+                                <h6 class="card-title">Total Students</h6>
+                                <h2 class="stats-card-number" id="totalStudents">-</h2>
+                                <small>Active: <span id="activeStudents">-</span></small>
                             </div>
-                            <i class="fas fa-users fa-2x"></i>
+                            <i class="fas fa-users fa-3x stats-card-icon"></i>
+                        </div>
+                        <div class="progress mt-2">
+                            <div class="progress-bar" id="studentsProgress" style="width: 0%"></div>
                         </div>
                     </div>
                 </div>
             </div>
             <div class="col-md-3">
-                <div class="card dashboard-card bg-success text-white">
+                <div class="card dashboard-card bg-success text-white h-100">
                     <div class="card-body">
-                        <div class="d-flex justify-content-between">
+                        <div class="d-flex justify-content-between align-items-center">
                             <div>
-                                <h5 class="card-title">Active Courses</h5>
-                                <h3 id="activeCourses">-</h3>
+                                <h6 class="card-title">Active Courses</h6>
+                                <h2 class="stats-card-number" id="activeCourses">-</h2>
+                                <small>Capacity: <span id="totalCapacity">-</span></small>
                             </div>
-                            <i class="fas fa-book fa-2x"></i>
+                            <i class="fas fa-book fa-3x stats-card-icon"></i>
+                        </div>
+                        <div class="progress mt-2">
+                            <div class="progress-bar" id="coursesProgress" style="width: 0%"></div>
                         </div>
                     </div>
                 </div>
             </div>
             <div class="col-md-3">
-                <div class="card dashboard-card bg-info text-white">
+                <div class="card dashboard-card bg-info text-white h-100">
                     <div class="card-body">
-                        <div class="d-flex justify-content-between">
+                        <div class="d-flex justify-content-between align-items-center">
                             <div>
-                                <h5 class="card-title">Total Enrollments</h5>
-                                <h3 id="totalEnrollments">-</h3>
+                                <h6 class="card-title">Enrollments</h6>
+                                <h2 class="stats-card-number" id="totalEnrollments">-</h2>
+                                <small>This Month: <span id="monthlyEnrollments">-</span></small>
                             </div>
-                            <i class="fas fa-user-plus fa-2x"></i>
+                            <div class="position-relative">
+                                <i class="fas fa-user-plus fa-3x stats-card-icon"></i>
+                                <span class="notification-badge" id="newEnrollmentsBadge">0</span>
+                            </div>
+                        </div>
+                        <div class="progress mt-2">
+                            <div class="progress-bar" id="enrollmentsProgress" style="width: 0%"></div>
                         </div>
                     </div>
                 </div>
             </div>
             <div class="col-md-3">
-                <div class="card dashboard-card bg-warning text-white">
+                <div class="card dashboard-card bg-warning text-white h-100">
                     <div class="card-body">
-                        <div class="d-flex justify-content-between">
+                        <div class="d-flex justify-content-between align-items-center">
                             <div>
-                                <h5 class="card-title">Revenue</h5>
-                                <h3 id="totalRevenue">-</h3>
+                                <h6 class="card-title">Revenue</h6>
+                                <h2 class="stats-card-number" id="totalRevenue">-</h2>
+                                <small>This Month: <span id="monthlyRevenue">-</span></small>
                             </div>
-                            <i class="fas fa-dollar-sign fa-2x"></i>
+                            <i class="fas fa-dollar-sign fa-3x stats-card-icon"></i>
+                        </div>
+                        <div class="progress mt-2">
+                            <div class="progress-bar" id="revenueProgress" style="width: 0%"></div>
                         </div>
                     </div>
                 </div>
             </div>
         </div>
 
-        <!-- Tabs -->
-        <ul class="nav nav-tabs" id="mainTabs" role="tablist">
-            <li class="nav-item" role="presentation">
-                <button class="nav-link active" id="students-tab" data-bs-toggle="tab" data-bs-target="#students" type="button">
-                    <i class="fas fa-users"></i> Students
-                </button>
-            </li>
-            <li class="nav-item" role="presentation">
-                <button class="nav-link" id="courses-tab" data-bs-toggle="tab" data-bs-target="#courses" type="button">
-                    <i class="fas fa-book"></i> Courses
-                </button>
-            </li>
-            <li class="nav-item" role="presentation">
-                <button class="nav-link" id="enrollments-tab" data-bs-toggle="tab" data-bs-target="#enrollments" type="button">
-                    <i class="fas fa-user-plus"></i> Enrollments
-                </button>
-            </li>
-        </ul>
+        <div class="row mb-4">
+            <div class="col-md-4">
+                <div class="card">
+                    <div class="card-body text-center">
+                        <i class="fas fa-chart-pie fa-2x text-primary mb-2"></i>
+                        <h6>Completion Rate</h6>
+                        <div class="progress">
+                            <div class="progress-bar bg-success" id="completionRate" style="width: 0%"></div>
+                        </div>
+                        <small class="text-muted"><span id="completionPercent">0</span>% courses completed</small>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="card">
+                    <div class="card-body text-center">
+                        <i class="fas fa-star fa-2x text-warning mb-2"></i>
+                        <h6>Average GPA</h6>
+                        <h3 class="text-primary" id="averageGPA">0.00</h3>
+                        <small class="text-muted">Overall student performance</small>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="card">
+                    <div class="card-body text-center">
+                        <i class="fas fa-clock fa-2x text-info mb-2"></i>
+                        <h6>System Uptime</h6>
+                        <h3 class="text-success" id="systemUptime">99.9%</h3>
+                        <small class="text-muted">Last 30 days</small>
+                    </div>
+                </div>
+            </div>
+        </div>
 
-        <div class="tab-content" id="mainTabContent">
-            <!-- Students Tab -->
-            <div class="tab-pane fade show active" id="students" role="tabpanel">
-                <div class="card mt-3">
+        <div class="row mb-4 fade-in" id="studentsTableContainer">
+            <div class="col-12">
+                <div class="card">
                     <div class="card-header d-flex justify-content-between align-items-center">
-                        <h5><i class="fas fa-users"></i> Students Management</h5>
-                        <button class="btn btn-primary" onclick="showAddStudentModal()">
-                            <i class="fas fa-plus"></i> Add Student
-                        </button>
+                        <h5 class="mb-0">
+                            <i class="fas fa-users me-2"></i> 
+                            Students Management
+                        </h5>
+                        <div>
+                            <button class="btn btn-light me-2" onclick="refreshStudents()">
+                                <i class="fas fa-sync-alt me-1"></i> Refresh
+                            </button>
+                            <button class="btn btn-light" onclick="showAddStudentModal()">
+                                <i class="fas fa-plus me-1"></i> Add Student
+                            </button>
+                        </div>
                     </div>
                     <div class="card-body">
-                        <div class="table-responsive">
-                            <table class="table table-striped" id="studentsTable">
-                                <thead>
+                        <div class="search-container">
+                            <div class="row">
+                                <div class="col-md-4">
+                                    <div class="mb-3">
+                                        <label class="form-label fw-bold">Search Students</label>
+                                        <input type="text" class="form-control" id="studentSearchInput" 
+                                               placeholder="Search by name, email, or ID..." 
+                                               onkeyup="filterStudents()">
+                                    </div>
+                                </div>
+                                <div class="col-md-3">
+                                    <div class="mb-3">
+                                        <label class="form-label fw-bold">Filter by Status</label>
+                                        <select class="form-select" id="studentStatusFilter" onchange="filterStudents()">
+                                            <option value="">All Statuses</option>
+                                            <option value="Active">Active</option>
+                                            <option value="Inactive">Inactive</option>
+                                            <option value="Graduated">Graduated</option>
+                                            <option value="Suspended">Suspended</option>
+                                        </select>
+                                    </div>
+                                </div>
+                                <div class="col-md-3">
+                                    <div class="mb-3">
+                                        <label class="form-label fw-bold">&nbsp;</label>
+                                        <button class="btn btn-outline-secondary w-100 d-block" onclick="clearStudentFilters()">
+                                            <i class="fas fa-times me-1"></i> Clear Filters
+                                        </button>
+                                    </div>
+                                </div>
+                                <div class="col-md-2">
+                                    <div class="mb-3">
+                                        <label class="form-label fw-bold">&nbsp;</label>
+                                        <div class="alert alert-info p-2 mb-0 text-center">
+                                            <small id="studentCount">Loading...</small>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="table-container">
+                            <table class="table table-hover mb-0" id="studentsTable">
+                                <thead class="sticky-top">
                                     <tr>
                                         <th>ID</th>
-                                        <th>Name</th>
+                                        <th>Student</th>
                                         <th>Email</th>
                                         <th>Phone</th>
                                         <th>Status</th>
@@ -139,29 +249,41 @@
                                     </tr>
                                 </thead>
                                 <tbody id="studentsTableBody">
+                                    <tr>
+                                        <td colspan="8" class="text-center py-5">
+                                            <div class="loading-spinner">
+                                                <i class="fas fa-spinner fa-spin fa-2x text-primary"></i>
+                                                <div class="mt-2">Loading students...</div>
+                                            </div>
+                                        </td>
+                                    </tr>
                                 </tbody>
                             </table>
                         </div>
                     </div>
                 </div>
             </div>
+        </div>
 
-            <!-- Courses Tab -->
-            <div class="tab-pane fade" id="courses" role="tabpanel">
-                <div class="card mt-3">
+        <div class="row mb-4 fade-in" id="coursesTableContainer">
+            <div class="col-12">
+                <div class="card">
                     <div class="card-header d-flex justify-content-between align-items-center">
-                        <h5><i class="fas fa-book"></i> Course Catalog</h5>
-                        <button class="btn btn-primary" onclick="showAddCourseModal()">
-                            <i class="fas fa-plus"></i> Add Course
+                        <h5 class="mb-0">
+                            <i class="fas fa-book me-2"></i> 
+                            Course Catalog
+                        </h5>
+                        <button class="btn btn-light" onclick="showAddCourseModal()">
+                            <i class="fas fa-plus me-1"></i> Add Course
                         </button>
                     </div>
                     <div class="card-body">
-                        <div class="table-responsive">
-                            <table class="table table-striped" id="coursesTable">
-                                <thead>
+                        <div class="table-container">
+                            <table class="table table-hover mb-0" id="coursesTable">
+                                <thead class="sticky-top">
                                     <tr>
                                         <th>Code</th>
-                                        <th>Name</th>
+                                        <th>Course</th>
                                         <th>Category</th>
                                         <th>Credits</th>
                                         <th>Price</th>
@@ -178,17 +300,21 @@
                     </div>
                 </div>
             </div>
+        </div>
 
-            <!-- Enrollments Tab -->
-            <div class="tab-pane fade" id="enrollments" role="tabpanel">
-                <div class="card mt-3">
+        <div class="row mb-4 fade-in" id="enrollmentsTableContainer">
+            <div class="col-12">
+                <div class="card">
                     <div class="card-header">
-                        <h5><i class="fas fa-user-plus"></i> Enrollment Management</h5>
+                        <h5 class="mb-0">
+                            <i class="fas fa-user-plus me-2"></i> 
+                            Enrollment Management
+                        </h5>
                     </div>
                     <div class="card-body">
-                        <div class="table-responsive">
-                            <table class="table table-striped" id="enrollmentsTable">
-                                <thead>
+                        <div class="table-container">
+                            <table class="table table-hover mb-0" id="enrollmentsTable">
+                                <thead class="sticky-top">
                                     <tr>
                                         <th>Student</th>
                                         <th>Course</th>
@@ -206,12 +332,387 @@
                 </div>
             </div>
         </div>
+
+        <!-- Student Modal - Fixed version -->
+        <div class="modal fade" id="studentModal" tabindex="-1" aria-labelledby="studentModalLabel" aria-hidden="true" data-bs-backdrop="true" data-bs-keyboard="true">
+            <div class="modal-dialog modal-lg">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="studentModalLabel">Add New Student</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <form id="studentForm" onsubmit="event.preventDefault(); saveStudent();">
+                        <div class="modal-body">
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <div class="mb-3">
+                                        <label for="firstName" class="form-label">First Name *</label>
+                                        <input type="text" class="form-control" id="firstName" name="firstName" required>
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="mb-3">
+                                        <label for="middleName" class="form-label">Middle Name</label>
+                                        <input type="text" class="form-control" id="middleName" name="middleName">
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <div class="mb-3">
+                                        <label for="lastName" class="form-label">Last Name *</label>
+                                        <input type="text" class="form-control" id="lastName" name="lastName" required>
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="mb-3">
+                                        <label for="email" class="form-label">Email *</label>
+                                        <input type="email" class="form-control" id="email" name="email" required>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <div class="mb-3">
+                                        <label for="phone" class="form-label">Phone</label>
+                                        <input type="tel" class="form-control" id="phone" name="phone" placeholder="+355 XX XXX XXXX">
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="mb-3">
+                                        <label for="dateOfBirth" class="form-label">Date of Birth</label>
+                                        <input type="date" class="form-control" id="dateOfBirth" name="dateOfBirth">
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <div class="mb-3">
+                                        <label for="studentStatus" class="form-label">Status</label>
+                                        <select class="form-select" id="studentStatus" name="studentStatus">
+                                            <option value="Active">Active</option>
+                                            <option value="Inactive">Inactive</option>
+                                            <option value="Graduated">Graduated</option>
+                                            <option value="Suspended">Suspended</option>
+                                        </select>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+                                <i class="fas fa-times"></i> Cancel
+                            </button>
+                            <button type="submit" class="btn btn-primary">
+                                <i class="fas fa-save"></i> Save Student
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+        <!-- Student Details Modal -->
+        <div class="modal fade" id="studentDetailsModal" tabindex="-1" aria-labelledby="studentDetailsModalLabel" aria-hidden="true">
+            <div class="modal-dialog modal-xl">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="studentDetailsModalLabel">
+                            <i class="fas fa-user"></i> Student Details: <span id="detailsStudentName"></span>
+                        </h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body">
+                        <div class="row mb-4">
+                            <div class="col-md-6">
+                                <div class="card h-100">
+                                    <div class="card-header">
+                                        <h6 class="mb-0">
+                                            <i class="fas fa-id-card me-2"></i>
+                                            Personal Information
+                                        </h6>
+                                    </div>
+                                    <div class="card-body">
+                                        <div class="row">
+                                            <div class="col-sm-6">
+                                                <p><strong>Email:</strong></p>
+                                                <p class="text-muted" id="detailsEmail"></p>
+                                            </div>
+                                            <div class="col-sm-6">
+                                                <p><strong>Phone:</strong></p>
+                                                <p class="text-muted" id="detailsPhone"></p>
+                                            </div>
+                                            <div class="col-sm-6">
+                                                <p><strong>Status:</strong></p>
+                                                <p id="detailsStatus"></p>
+                                            </div>
+                                            <div class="col-sm-6">
+                                                <p><strong>Registration Date:</strong></p>
+                                                <p class="text-muted" id="detailsRegistrationDate"></p>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="card h-100">
+                                    <div class="card-header">
+                                        <h6 class="mb-0">
+                                            <i class="fas fa-chart-line me-2"></i>
+                                            Academic Performance
+                                        </h6>
+                                    </div>
+                                    <div class="card-body">
+                                        <div class="row">
+                                            <div class="col-sm-6">
+                                                <p><strong>Current GPA:</strong></p>
+                                                <h4 class="text-primary" id="detailsGPA"></h4>
+                                            </div>
+                                            <div class="col-sm-6">
+                                                <p><strong>Total Paid:</strong></p>
+                                                <h4 class="text-success" id="detailsTotalPaid"></h4>
+                                            </div>
+                                            <div class="col-sm-4">
+                                                <p><strong>Total Enrollments:</strong></p>
+                                                <span class="badge bg-info fs-6" id="detailsTotalEnrollments"></span>
+                                            </div>
+                                            <div class="col-sm-4">
+                                                <p><strong>Active:</strong></p>
+                                                <span class="badge bg-primary fs-6" id="detailsActiveEnrollments"></span>
+                                            </div>
+                                            <div class="col-sm-4">
+                                                <p><strong>Completed:</strong></p>
+                                                <span class="badge bg-success fs-6" id="detailsCompletedCourses"></span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="card">
+                            <div class="card-header">
+                                <h6 class="mb-0">
+                                    <i class="fas fa-history me-2"></i>
+                                    Enrollment History
+                                </h6>
+                            </div>
+                            <div class="card-body">
+                                <div class="table-responsive">
+                                    <table class="table table-sm table-hover">
+                                        <thead>
+                                            <tr>
+                                                <th>Course Code</th>
+                                                <th>Course Name</th>
+                                                <th>Credits</th>
+                                                <th>Status</th>
+                                                <th>Grade</th>
+                                                <th>Amount Paid</th>
+                                                <th>Enrollment Date</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody id="studentEnrollmentsBody">
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-info" onclick="generateTranscript()">
+                            <i class="fas fa-file-alt"></i> Generate Transcript
+                        </button>
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+                            <i class="fas fa-times"></i> Close
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
     </div>
 
-    <!-- Modals would go here -->
+    <button class="btn btn-dark dark-mode-toggle" onclick="toggleDarkMode()" title="Toggle Dark Mode">
+        <i class="fas fa-moon" id="darkModeIcon"></i>
+    </button>
+
     
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script src="js/api.js"></script>
+    <script src="js/app.js"></script>
+    <script src="js/students.js"></script>
+    <script src="js/animations.js"></script>
+</body>
+</html>
+        </div>
+    </div>
+
+    <button class="btn btn-dark dark-mode-toggle" onclick="toggleDarkMode()" title="Toggle Dark Mode">
+        <i class="fas fa-moon" id="darkModeIcon"></i>
+    </button>
+
+    
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="js/api.js"></script>
+    <script src="js/app.js"></script>
+    <script src="js/students.js"></script>
+    <script src="js/animations.js"></script>
+</body>
+</html>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label for="studentStatus" class="form-label fw-bold">
+                                        <i class="fas fa-info-circle me-1"></i>Status
+                                    </label>
+                                    <select class="form-select" id="studentStatus">
+                                        <option value="Active">Active</option>
+                                        <option value="Inactive">Inactive</option>
+                                        <option value="Graduated">Graduated</option>
+                                        <option value="Suspended">Suspended</option>
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+                            <i class="fas fa-times me-1"></i>Cancel
+                        </button>
+                        <button type="submit" class="btn btn-primary">
+                            <i class="fas fa-save me-1"></i>Save Student
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal fade" id="studentDetailsModal" tabindex="-1">
+        <div class="modal-dialog modal-xl">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">
+                        <i class="fas fa-user-circle me-2"></i>
+                        Student Details: <span id="detailsStudentName"></span>
+                    </h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="row mb-4">
+                        <div class="col-md-6">
+                            <div class="card h-100">
+                                <div class="card-header">
+                                    <h6 class="mb-0">
+                                        <i class="fas fa-id-card me-2"></i>
+                                        Personal Information
+                                    </h6>
+                                </div>
+                                <div class="card-body">
+                                    <div class="row">
+                                        <div class="col-sm-6">
+                                            <p><strong>Email:</strong></p>
+                                            <p class="text-muted" id="detailsEmail"></p>
+                                        </div>
+                                        <div class="col-sm-6">
+                                            <p><strong>Phone:</strong></p>
+                                            <p class="text-muted" id="detailsPhone"></p>
+                                        </div>
+                                        <div class="col-sm-6">
+                                            <p><strong>Status:</strong></p>
+                                            <p id="detailsStatus"></p>
+                                        </div>
+                                        <div class="col-sm-6">
+                                            <p><strong>Registration Date:</strong></p>
+                                            <p class="text-muted" id="detailsRegistrationDate"></p>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="card h-100">
+                                <div class="card-header">
+                                    <h6 class="mb-0">
+                                        <i class="fas fa-chart-line me-2"></i>
+                                        Academic Performance
+                                    </h6>
+                                </div>
+                                <div class="card-body">
+                                    <div class="row">
+                                        <div class="col-sm-6">
+                                            <p><strong>Current GPA:</strong></p>
+                                            <h4 class="text-primary" id="detailsGPA"></h4>
+                                        </div>
+                                        <div class="col-sm-6">
+                                            <p><strong>Total Paid:</strong></p>
+                                            <h4 class="text-success" id="detailsTotalPaid"></h4>
+                                        </div>
+                                        <div class="col-sm-4">
+                                            <p><strong>Total Enrollments:</strong></p>
+                                            <span class="badge bg-info fs-6" id="detailsTotalEnrollments"></span>
+                                        </div>
+                                        <div class="col-sm-4">
+                                            <p><strong>Active:</strong></p>
+                                            <span class="badge bg-primary fs-6" id="detailsActiveEnrollments"></span>
+                                        </div>
+                                        <div class="col-sm-4">
+                                            <p><strong>Completed:</strong></p>
+                                            <span class="badge bg-success fs-6" id="detailsCompletedCourses"></span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="card">
+                        <div class="card-header">
+                            <h6 class="mb-0">
+                                <i class="fas fa-history me-2"></i>
+                                Enrollment History
+                            </h6>
+                        </div>
+                        <div class="card-body">
+                            <div class="table-responsive">
+                                <table class="table table-sm table-hover">
+                                    <thead>
+                                        <tr>
+                                            <th>Course Code</th>
+                                            <th>Course Name</th>
+                                            <th>Credits</th>
+                                            <th>Status</th>
+                                            <th>Grade</th>
+                                            <th>Amount Paid</th>
+                                            <th>Enrollment Date</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="studentEnrollmentsBody">
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-info" onclick="generateTranscript(studentManager.currentStudent?.student_id)">
+                        <i class="fas fa-file-alt me-1"></i>Generate Transcript
+                    </button>
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+                        <i class="fas fa-times me-1"></i>Close
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="js/api.js"></script>
+    <script src="js/students.js"></script>
     <script src="js/app.js"></script>
 </body>
 </html>

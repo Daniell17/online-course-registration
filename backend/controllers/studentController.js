@@ -1,17 +1,31 @@
-const Student = require('../models/Student').default;
+const Student = require('../models/Student');
 const { validationResult } = require('express-validator');
 
 const studentController = {
-    // GET /api/students
+    // /api/students
     getAllStudents: async (req, res) => {
         try {
             const students = await Student.findAll();
+            
+            // Add computed fields for frontend compatibility
+            const studentsWithStats = students.map(student => ({
+                ...student,
+                full_name: student.full_name,
+                student_status: student.status || 'Active',
+                total_enrollments: 0,
+                active_enrollments: 0,
+                completed_courses: 0,
+                gpa: null,
+                total_paid: 0
+            }));
+
             res.json({
                 success: true,
-                data: students,
-                count: students.length
+                data: studentsWithStats,
+                count: studentsWithStats.length
             });
         } catch (error) {
+            console.error('Error fetching students:', error);
             res.status(500).json({
                 success: false,
                 message: 'Error fetching students',
@@ -20,7 +34,7 @@ const studentController = {
         }
     },
 
-    // GET /api/students/:id
+    // /api/students/:id
     getStudentById: async (req, res) => {
         try {
             const student = await Student.findById(req.params.id);
@@ -43,7 +57,7 @@ const studentController = {
         }
     },
 
-    // POST /api/students
+    // /api/students
     createStudent: async (req, res) => {
         try {
             const errors = validationResult(req);
@@ -72,7 +86,7 @@ const studentController = {
         }
     },
 
-    // PUT /api/students/:id
+    // /api/students/:id
     updateStudent: async (req, res) => {
         try {
             const errors = validationResult(req);
@@ -107,7 +121,7 @@ const studentController = {
         }
     },
 
-    // DELETE /api/students/:id
+    // /api/students/:id
     deleteStudent: async (req, res) => {
         try {
             const deleted = await Student.delete(req.params.id);
@@ -131,7 +145,7 @@ const studentController = {
         }
     },
 
-    // GET /api/students/:id/enrollments
+    // /api/students/:id/enrollments
     getStudentEnrollments: async (req, res) => {
         try {
             const enrollments = await Student.getEnrollments(req.params.id);
@@ -149,7 +163,7 @@ const studentController = {
         }
     },
 
-    // GET /api/students/:id/transcript
+    // /api/students/:id/transcript
     getStudentTranscript: async (req, res) => {
         try {
             const transcript = await Student.generateTranscript(req.params.id);
