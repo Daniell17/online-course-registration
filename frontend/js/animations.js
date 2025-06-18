@@ -1,4 +1,3 @@
-// Animation and interaction enhancements
 class AnimationManager {
     constructor() {
         this.init();
@@ -96,7 +95,7 @@ class AnimationManager {
         let isOnline = true;
         
         setInterval(() => {
-            if (Math.random() > 0.95) { // 5% chance to simulate status change
+            if (Math.random() > 0.95) {
                 isOnline = !isOnline;
                 statusElement.textContent = isOnline ? 'System Online' : 'System Maintenance';
                 statusElement.className = isOnline ? 'badge bg-success' : 'badge bg-warning';
@@ -104,11 +103,10 @@ class AnimationManager {
         }, 5000);
     }
 
-    // Notification system
     setupNotificationSystem() {
         setInterval(() => {
             this.updateNotificationBadge();
-        }, 30000); // Update every 30 seconds
+        }, 30000);
     }
 
     updateNotificationBadge() {
@@ -122,7 +120,6 @@ class AnimationManager {
         }
     }
 
-    // Loading overlay
     showLoading() {
         document.getElementById('loadingOverlay').classList.remove('d-none');
     }
@@ -131,7 +128,6 @@ class AnimationManager {
         document.getElementById('loadingOverlay').classList.add('d-none');
     }
 
-    // Success animation
     showSuccessAnimation(element) {
         element.style.animation = 'bounce 0.6s ease';
         setTimeout(() => {
@@ -139,7 +135,6 @@ class AnimationManager {
         }, 600);
     }
 
-    // Error shake animation
     showErrorAnimation(element) {
         element.style.animation = 'shake 0.5s ease';
         setTimeout(() => {
@@ -148,10 +143,8 @@ class AnimationManager {
     }
 }
 
-// Initialize animation manager
 const animationManager = new AnimationManager();
 
-// Enhanced alert function with animations
 function showAlert(message, type = 'info', duration = 5000) {
     const alertContainer = document.getElementById('alertContainer') || createAlertContainer();
     
@@ -159,7 +152,6 @@ function showAlert(message, type = 'info', duration = 5000) {
     alert.className = `alert alert-${type} alert-dismissible fade show`;
     alert.style.animation = 'slideInLeft 0.5s ease';
     
-    // Add icons based on type
     const icons = {
         success: 'fas fa-check-circle',
         danger: 'fas fa-exclamation-triangle',
@@ -175,7 +167,6 @@ function showAlert(message, type = 'info', duration = 5000) {
     
     alertContainer.appendChild(alert);
     
-    // Auto-remove with fade out
     setTimeout(() => {
         if (alert.parentNode) {
             alert.style.animation = 'fadeOut 0.5s ease';
@@ -184,7 +175,6 @@ function showAlert(message, type = 'info', duration = 5000) {
     }, duration);
 }
 
-// Dark mode toggle
 function toggleDarkMode() {
     const body = document.body;
     const icon = document.getElementById('darkModeIcon');
@@ -200,12 +190,10 @@ function toggleDarkMode() {
     }
 }
 
-// Enhanced export function
 function exportData() {
     animationManager.showLoading();
     
     setTimeout(() => {
-        // Simulate data export
         const data = {
             students: currentStudents,
             courses: currentCourses,
@@ -225,7 +213,6 @@ function exportData() {
     }, 2000);
 }
 
-// Enhanced refresh function
 async function refreshAll() {
     animationManager.showLoading();
     
@@ -235,7 +222,6 @@ async function refreshAll() {
         await loadCourses();
         await loadEnrollments();
         
-        // Reset progress bars and re-animate
         animationManager.setupProgressAnimations();
         
         showAlert('All data refreshed successfully!', 'success');
@@ -246,13 +232,10 @@ async function refreshAll() {
     }
 }
 
-// Show analytics modal
 function showAnalytics() {
     showAlert('Advanced Analytics Dashboard - Coming Soon!', 'info');
-    // Here you would open a detailed analytics modal/page
 }
 
-// Add CSS for additional animations
 const additionalCSS = `
 @keyframes fadeOut {
     from { opacity: 1; transform: translateX(0); }
@@ -291,12 +274,10 @@ const additionalCSS = `
 }
 `;
 
-// Inject additional CSS
 const style = document.createElement('style');
 style.textContent = additionalCSS;
 document.head.appendChild(style);
 
-// Load dark mode preference
 if (localStorage.getItem('darkMode') === 'enabled') {
     document.body.classList.add('dark-mode');
     document.getElementById('darkModeIcon').className = 'fas fa-sun';

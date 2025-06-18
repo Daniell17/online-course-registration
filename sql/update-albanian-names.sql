@@ -1,4 +1,3 @@
--- Update existing students with Albanian names
 UPDATE Students SET 
     first_name = 'Ardit', 
     last_name = 'Hoxha', 
@@ -47,7 +46,7 @@ UPDATE Students SET
     email = 'manjola.kastrati@email.com'
 WHERE student_id = 8;
 
--- Verify the changes
+SELECT student_id, first_name, last_name, email FROM Students ORDER BY student_id;
 SELECT student_id, first_name, last_name, email FROM Students ORDER BY student_id;
     first_name = 'Manjola', 
     last_name = 'Kastrati', 

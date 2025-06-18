@@ -1,13 +1,10 @@
-// Student management functions
 class StudentManager {
     constructor() {
         this.currentStudent = null;
         this.modal = null;
         this.detailsModal = null;
-        // Don't initialize modals in constructor
     }
 
-    // Initialize modals when DOM is ready
     initializeModals() {
         const studentModalElement = document.getElementById('studentModal');
         const detailsModalElement = document.getElementById('studentDetailsModal');
@@ -33,9 +30,7 @@ class StudentManager {
         }
     }
 
-    // Show add student modal
     showAddModal() {
-        // Initialize modals if not already done
         if (!this.modal) {
             this.initializeModals();
         }
@@ -51,7 +46,6 @@ class StudentManager {
         }
     }
 
-    // Show edit student modal
     async showEditModal(studentId) {
         try {
             const response = await api.getStudent(studentId);
@@ -69,7 +63,6 @@ class StudentManager {
         }
     }
 
-    // Reset form
     resetForm() {
         const form = document.getElementById('studentForm');
         if (form) {
@@ -77,7 +70,6 @@ class StudentManager {
         }
     }
 
-    // Populate form with student data
     populateForm(student) {
         const setFieldValue = (id, value) => {
             const field = document.getElementById(id);
@@ -95,7 +87,6 @@ class StudentManager {
         setFieldValue('studentStatus', student.student_status || 'Active');
     }
 
-    // Save student (create or update)
     async saveStudent() {
         try {
             const formData = this.getFormData();
@@ -106,16 +97,13 @@ class StudentManager {
 
             let response;
             if (this.currentStudent) {
-                // Update existing student
                 response = await api.updateStudent(this.currentStudent.student_id, formData);
                 showAlert('Student updated successfully!', 'success');
             } else {
-                // Create new student
                 response = await api.createStudent(formData);
                 showAlert('Student created successfully!', 'success');
             }
 
-            // Close modal and refresh table
             if (this.modal) {
                 this.modal.hide();
             }
@@ -129,7 +117,6 @@ class StudentManager {
         }
     }
 
-    // Get form data
     getFormData() {
         const getFieldValue = (id) => {
             const field = document.getElementById(id);
@@ -147,7 +134,6 @@ class StudentManager {
         };
     }
 
-    // Validate form data
     validateForm(formData) {
         if (!formData.firstName) {
             showAlert('First name is required', 'warning');
@@ -172,13 +158,11 @@ class StudentManager {
         return true;
     }
 
-    // Email validation
     isValidEmail(email) {
         const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
         return emailRegex.test(email);
     }
 
-    // Show student details modal
     async showDetailsModal(studentId) {
         try {
             const response = await api.getStudent(studentId);
@@ -198,7 +182,6 @@ class StudentManager {
         }
     }
 
-    // Populate details modal
     populateDetailsModal(student, enrollments) {
         document.getElementById('detailsStudentName').textContent = student.full_name;
         document.getElementById('detailsEmail').textContent = student.email;
@@ -326,7 +309,6 @@ class StudentManager {
         `;
     }
 
-    // Delete student with confirmation
     async deleteStudent(studentId, studentName) {
         if (!confirm(`Are you sure you want to delete student "${studentName}"?\n\nThis will also remove all their enrollments and payment records.\n\nThis action cannot be undone.`)) {
             return;
@@ -344,18 +326,14 @@ class StudentManager {
     }
 }
 
-// Create global student manager instance
-const studentManager = new StudentManager();
+// const studentManager = new StudentManager();
 
-// Initialize student manager but don't create modals yet
-const studentManager = new StudentManager();
+// const studentManager = new StudentManager();
 
-// Initialize modals when DOM is loaded
 document.addEventListener('DOMContentLoaded', () => {
     studentManager.initializeModals();
 });
 
-// Global functions that use the student manager
 function showAddStudentModal() {
     studentManager.showAddModal();
 }
@@ -382,7 +360,6 @@ function generateTranscript(studentId) {
     studentManager.generateTranscript(studentId);
 }
 
-// Additional helper functions
 function closeStudentModal() {
     if (studentManager.modal) {
         studentManager.modal.hide();
