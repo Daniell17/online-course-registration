@@ -52,6 +52,7 @@ INNER JOIN Enrollments e ON p.enrollment_id = e.enrollment_id
 GROUP BY DATE_FORMAT(p.payment_date, '%Y-%m')
 ORDER BY payment_month DESC;
 
+
 DELIMITER //
 
 CREATE TRIGGER tr_UpdateCourseStatus
@@ -121,5 +122,4 @@ BEGIN
     WHERE student_id = NEW.student_id;
 END //
 
-DELIMITER ;
 DELIMITER ;

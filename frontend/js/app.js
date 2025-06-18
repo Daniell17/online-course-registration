@@ -7,6 +7,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     console.log('Initializing Course Registration System...');
     
     try {
+        // Initialize student manager modals first
         if (typeof studentManager !== 'undefined') {
             studentManager.initializeModals();
         }
@@ -23,6 +24,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     }
 });
 
+// Dashboard functions
 async function loadDashboardStats() {
     try {
         const response = await api.getDashboardStats();
@@ -122,6 +124,7 @@ function renderStudentsTable() {
     });
 }
 
+// Course management functions
 async function loadCourses() {
     try {
         const response = await api.getCourses();
@@ -174,6 +177,7 @@ function renderCoursesTable() {
     });
 }
 
+// Enrollment management functions
 async function loadEnrollments() {
     try {
         const response = await api.getEnrollments();
@@ -219,6 +223,7 @@ function renderEnrollmentsTable() {
     });
 }
 
+// Filter and search functions
 function filterStudents() {
     const searchTerm = document.getElementById('studentSearchInput')?.value.toLowerCase() || '';
     const statusFilter = document.getElementById('studentStatusFilter')?.value || '';
@@ -253,6 +258,7 @@ function updateStudentCount() {
     }
 }
 
+// Utility functions
 function getStatusColor(status) {
     const colorMap = {
         'Active': 'success',
@@ -295,6 +301,7 @@ function showAlert(message, type = 'info') {
     
     alertContainer.appendChild(alert);
     
+    // Auto-remove after 5 seconds
     setTimeout(() => {
         if (alert.parentNode) {
             alert.remove();
@@ -324,6 +331,7 @@ function createAlertContainer() {
     return container;
 }
 
+// Refresh functions
 async function refreshStudents() {
     await loadStudents();
     await loadDashboardStats();
@@ -342,6 +350,7 @@ async function refreshAll() {
     }
 }
 
+// Simple fallback function for showAddStudentModal
 function showAddStudentModal() {
     const modalElement = document.getElementById('studentModal');
     if (modalElement) {
@@ -352,3 +361,4 @@ function showAddStudentModal() {
     }
 }
 
+// Placeholder functions (now removed since we have the actual student manager)

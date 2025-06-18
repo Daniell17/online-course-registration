@@ -1,3 +1,4 @@
+-- Function 1: Calculate Student GPA
 CREATE FUNCTION CalculateStudentGPA(p_student_id INT)
 RETURNS DECIMAL(3,2)
 READS SQL DATA
@@ -15,6 +16,7 @@ BEGIN
     RETURN COALESCE(student_gpa, 0.00);
 END //
 
+-- Function 2: Get Available Spots in Course
 CREATE FUNCTION GetAvailableSpots(p_course_id INT)
 RETURNS INT
 READS SQL DATA
@@ -39,9 +41,10 @@ BEGIN
     RETURN GREATEST(available_spots, 0);
 END //
 
+-- Procedure 3: Bulk Enrollment with Validation
 CREATE PROCEDURE BulkEnrollStudents(
     IN p_course_id INT,
-    IN p_student_ids TEXT,
+    IN p_student_ids TEXT, -- Comma-separated student IDs
     OUT p_success_count INT,
     OUT p_error_messages TEXT
 )
@@ -66,6 +69,7 @@ BEGIN
     SET student_list = CONCAT(p_student_ids, ',');
     SET p_error_messages = '';
     
+    -- Parse comma-separated student IDs
     WHILE pos <= LENGTH(student_list) DO
         SET next_pos = LOCATE(',', student_list, pos);
         
@@ -73,6 +77,7 @@ BEGIN
             SET temp_student_id = TRIM(SUBSTRING(student_list, pos, next_pos - pos));
             SET current_student_id = CAST(temp_student_id AS UNSIGNED);
             
+            -- Validate student exists
             IF (SELECT COUNT(*) FROM Students WHERE student_id = current_student_id) > 0 THEN
                 -- Check if already enrolled
                 IF (SELECT COUNT(*) FROM Enrollments 
@@ -99,6 +104,7 @@ BEGIN
     SET p_success_count = success_counter;
 END //
 
+-- Procedure 4: Generate Student Transcript
 CREATE PROCEDURE GenerateStudentTranscript(
     IN p_student_id INT
 )
@@ -155,9 +161,10 @@ BEGIN
     END IF;
 END //
 
+-- Procedure 5: Course Waitlist Management
 CREATE PROCEDURE ManageCourseWaitlist(
     IN p_course_id INT,
-    IN p_action VARCHAR(20),
+    IN p_action VARCHAR(20), -- 'ADD', 'REMOVE', 'PROCESS'
     IN p_student_id INT,
     OUT p_result_message VARCHAR(255)
 )
@@ -191,9 +198,6 @@ BEGIN
         ELSE
             SET p_result_message = 'Invalid action specified';
     END CASE;
-END //
-
-DELIMITER ;
 END //
 
 DELIMITER ;

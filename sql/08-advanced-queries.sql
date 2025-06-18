@@ -1,3 +1,4 @@
+
 SELECT 
     c.course_name,
     c.category,
@@ -51,6 +52,7 @@ ORDER BY
     END,
     s.gpa DESC;
 
+-- Query 3: Instructor Workload and Performance Analysis
 SELECT 
     i.instructor_id,
     CONCAT(i.first_name, ' ', i.last_name) as instructor_name,
@@ -70,6 +72,7 @@ LEFT JOIN Enrollments e ON ci.course_id = e.course_id
 GROUP BY i.instructor_id, i.first_name, i.last_name, i.specialization
 ORDER BY retention_rate DESC, avg_student_grade DESC;
 
+-- Query 4: Revenue Forecasting and Trend Analysis
 SELECT 
     payment_month,
     completed_revenue,
@@ -83,6 +86,7 @@ SELECT
 FROM vw_FinancialSummary
 ORDER BY payment_month DESC;
 
+-- Query 5: Course Recommendation System (Students who enrolled in X also enrolled in Y)
 SELECT 
     c1.course_name as base_course,
     c2.course_name as recommended_course,
@@ -103,6 +107,7 @@ GROUP BY c1.course_id, c1.course_name, c2.course_id, c2.course_name
 HAVING co_enrollment_count >= 2
 ORDER BY c1.course_name, recommendation_strength DESC;
 
+-- Query 6: Time-based Enrollment Patterns
 SELECT 
     HOUR(enrollment_date) as enrollment_hour,
     DAYOFWEEK(enrollment_date) as day_of_week,
@@ -114,11 +119,6 @@ SELECT
         WHEN 5 THEN 'Thursday'
         WHEN 6 THEN 'Friday'
         WHEN 7 THEN 'Saturday'
-    END as day_name,
-    COUNT(*) as enrollment_count
-FROM Enrollments
-GROUP BY HOUR(enrollment_date), DAYOFWEEK(enrollment_date)
-ORDER BY day_of_week, enrollment_hour;
     END as day_name,
     COUNT(*) as enrollment_count
 FROM Enrollments

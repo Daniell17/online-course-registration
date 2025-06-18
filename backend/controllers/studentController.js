@@ -7,6 +7,7 @@ const studentController = {
         try {
             const students = await Student.findAll();
             
+            // Add computed fields for frontend compatibility
             const studentsWithStats = students.map(student => ({
                 ...student,
                 full_name: student.full_name,

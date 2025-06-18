@@ -2,6 +2,7 @@ const Course = require('../models/Course');
 const { validationResult } = require('express-validator');
 
 const courseController = {
+    //  /api/courses
     getAllCourses: async (req, res) => {
         try {
             const filters = {

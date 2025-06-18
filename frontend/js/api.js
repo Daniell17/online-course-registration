@@ -38,6 +38,7 @@ class APIClient {
         }
     }
 
+    // Student API methods
     async getStudents() {
         return this.request('/students');
     }
