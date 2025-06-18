@@ -16,16 +16,24 @@ class APIClient {
         }
 
         try {
+            console.log(`Making API request to: ${url}`);
             const response = await fetch(url, config);
-            const data = await response.json();
             
             if (!response.ok) {
-                throw new Error(data.message || 'API request failed');
+                throw new Error(`HTTP ${response.status}: ${response.statusText}`);
             }
             
+            const data = await response.json();
+            console.log('API response received:', data);
             return data;
         } catch (error) {
             console.error('API Request Error:', error);
+            
+            // Handle network errors
+            if (error.name === 'TypeError' && error.message.includes('fetch')) {
+                throw new Error('Cannot connect to server. Please ensure the backend is running on http://localhost:3000');
+            }
+            
             throw error;
         }
     }
@@ -115,6 +123,24 @@ class APIClient {
     async getRevenueAnalytics() {
         return this.request('/analytics/revenue');
     }
+
+    // Test connection method
+    async testConnection() {
+        try {
+            const response = await fetch(`${API_BASE_URL}/health`);
+            return response.ok;
+        } catch (error) {
+            return false;
+        }
+    }
 }
 
 const api = new APIClient();
+
+// Test connection on load
+document.addEventListener('DOMContentLoaded', async () => {
+    const isConnected = await api.testConnection();
+    if (!isConnected) {
+        console.warn('Backend server not accessible. Please start the backend server.');
+    }
+});

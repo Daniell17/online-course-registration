@@ -249,28 +249,58 @@ const additionalCSS = `
 }
 
 .dark-mode {
-    background: linear-gradient(135deg, #2c3e50 0%, #34495e 100%) !important;
-    color: white;
+    background: linear-gradient(135deg, #1a1a1a 0%, #2d2d2d 100%) !important;
+    color: #fffef7;
 }
 
 .dark-mode .container {
-    background: rgba(52, 73, 94, 0.95) !important;
-    color: white;
+    background: rgba(45, 45, 45, 0.95) !important;
+    color: #fffef7;
+    border-color: #404040;
 }
 
 .dark-mode .card {
-    background: rgba(44, 62, 80, 0.8) !important;
-    color: white;
+    background: rgba(64, 64, 64, 0.8) !important;
+    color: #fffef7;
+    border-color: #2d2d2d;
 }
 
 .dark-mode .table {
-    color: white;
+    color: #fffef7;
 }
 
 .dark-mode .form-control, .dark-mode .form-select {
-    background: rgba(52, 73, 94, 0.8);
-    color: white;
-    border-color: #495057;
+    background: rgba(64, 64, 64, 0.8);
+    color: #fffef7;
+    border-color: #2d2d2d;
+}
+
+.dark-mode .form-label {
+    color: #f5f5dc;
+}
+
+.dark-mode .quick-actions {
+    background: rgba(64, 64, 64, 0.8);
+    border-color: #2d2d2d;
+}
+
+.dark-mode .search-container {
+    background: rgba(64, 64, 64, 0.8);
+    border-color: #2d2d2d;
+}
+
+.dark-mode .modal-content {
+    background: #2d2d2d;
+    color: #fffef7;
+}
+
+.dark-mode .modal-body {
+    background: #404040;
+}
+
+.dark-mode .modal-footer {
+    background: #1a1a1a;
+    border-color: #2d2d2d;
 }
 `;
 
