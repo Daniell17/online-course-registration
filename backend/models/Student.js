@@ -1,22 +1,20 @@
 const { pool } = require('../config/database');
 
-class Student {
-    static async findAll() {
+class Student {    static async findAll() {
         const [rows] = await pool.execute(`
-            SELECT student_id, first_name, middle_name, last_name, email, 
-                   phone, date_of_birth, status, registration_date,
-                   CONCAT(first_name, ' ', COALESCE(middle_name, ''), ' ', last_name) as full_name
+            SELECT student_id, first_name, last_name, email, 
+                   phone, date_of_birth, registration_date,
+                   CONCAT(first_name, ' ', last_name) as full_name,
+                   'Active' as student_status
             FROM Students 
             ORDER BY last_name, first_name
         `);
         return rows;
-    }
-
-    static async findById(id) {
+    }    static async findById(id) {
         const [rows] = await pool.execute(`
-            SELECT s.student_id, s.first_name, s.middle_name, s.last_name, s.email, 
-                   s.phone, s.date_of_birth, s.status as student_status, s.registration_date,
-                   CONCAT(s.first_name, ' ', COALESCE(s.middle_name, ''), ' ', s.last_name) as full_name,
+            SELECT s.student_id, s.first_name, s.last_name, s.email, 
+                   s.phone, s.date_of_birth, 'Active' as student_status, s.registration_date,
+                   CONCAT(s.first_name, ' ', s.last_name) as full_name,
                    COUNT(e.enrollment_id) as total_enrollments,
                    COUNT(CASE WHEN e.status = 'Enrolled' THEN 1 END) as active_enrollments,
                    COUNT(CASE WHEN e.status = 'Completed' THEN 1 END) as completed_courses,
@@ -26,32 +24,29 @@ class Student {
             LEFT JOIN Enrollments e ON s.student_id = e.student_id
             LEFT JOIN Payments p ON e.enrollment_id = p.enrollment_id AND p.payment_status = 'Completed'
             WHERE s.student_id = ?
-            GROUP BY s.student_id, s.first_name, s.middle_name, s.last_name, s.email, 
-                     s.phone, s.date_of_birth, s.status, s.registration_date
+            GROUP BY s.student_id, s.first_name, s.last_name, s.email, 
+                     s.phone, s.date_of_birth, s.registration_date
         `, [id]);
         return rows[0];
-    }
-
-    static async create(studentData) {
-        const { firstName, middleName, lastName, email, phone, dateOfBirth } = studentData;
+    }    static async create(studentData) {
+        const { firstName, lastName, email, phone, dateOfBirth } = studentData;
         
         const [result] = await pool.execute(`
-            INSERT INTO Students (first_name, middle_name, last_name, email, phone, date_of_birth)
-            VALUES (?, ?, ?, ?, ?, ?)
-        `, [firstName, middleName || null, lastName, email, phone || null, dateOfBirth || null]);
+            INSERT INTO Students (first_name, last_name, email, phone, date_of_birth)
+            VALUES (?, ?, ?, ?, ?)
+        `, [firstName, lastName, email, phone || null, dateOfBirth || null]);
         
         return result.insertId;
     }
 
     static async update(id, studentData) {
-        const { firstName, middleName, lastName, email, phone, dateOfBirth, status } = studentData;
+        const { firstName, lastName, email, phone, dateOfBirth } = studentData;
         
         const [result] = await pool.execute(`
             UPDATE Students 
-            SET first_name = ?, middle_name = ?, last_name = ?, 
-                email = ?, phone = ?, date_of_birth = ?, status = ?
+            SET first_name = ?, last_name = ?, email = ?, phone = ?, date_of_birth = ?
             WHERE student_id = ?
-        `, [firstName, middleName || null, lastName, email, phone || null, dateOfBirth || null, status, id]);
+        `, [firstName, lastName, email, phone || null, dateOfBirth || null, id]);
         
         return result.affectedRows > 0;
     }
@@ -88,4 +83,4 @@ class Student {
     }
 }
 
-export default Student;
+module.exports = Student;

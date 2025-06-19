@@ -47,10 +47,9 @@ const analyticsController = {
 
     getCourseAnalytics: async (req, res) => {
         try {
-            const [rows] = await pool.execute(`
-                SELECT 
+            const [rows] = await pool.execute(`                SELECT 
                     c.course_name,
-                    c.category,
+                    c.course_code,
                     COUNT(e.enrollment_id) as total_enrollments,
                     COUNT(CASE WHEN e.status = 'Completed' THEN 1 END) as completions,
                     COUNT(CASE WHEN e.status = 'Dropped' THEN 1 END) as dropouts,
@@ -61,7 +60,7 @@ const analyticsController = {
                     AVG(CASE WHEN e.grade IS NOT NULL THEN e.grade END) as average_grade
                 FROM Courses c
                 LEFT JOIN Enrollments e ON c.course_id = e.course_id
-                GROUP BY c.course_id, c.course_name, c.category
+                GROUP BY c.course_id, c.course_name, c.course_code
                 HAVING total_enrollments > 0
                 ORDER BY completion_rate DESC
             `);

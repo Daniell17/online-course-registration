@@ -18,22 +18,8 @@ app.use(morgan('combined')); // Logging
 app.use(express.json({ limit: '10mb' })); // Parse JSON bodies
 app.use(express.urlencoded({ extended: true })); // Parse URL-encoded bodies
 
-// Database connection
-const db = mysql.createConnection({
-    host: 'localhost',
-    user: 'root',
-    password: 'your_password',
-    database: 'course_registration'
-});
-
-// Connect to database
-db.connect((err) => {
-    if (err) {
-        console.error('Database connection failed:', err);
-        return;
-    }
-    console.log('Connected to MySQL database');
-});
+// Database connection will be handled by the pool in config/database.js
+// Remove the duplicate connection code as it's already handled in the database config
 
 // Routes
 app.use('/api', apiRoutes);
