@@ -352,18 +352,11 @@
                                 </div>
                                 <div class="col-md-6">
                                     <div class="mb-3">
-                                        <label for="middleName" class="form-label">Middle Name</label>
-                                        <input type="text" class="form-control" id="middleName" name="middleName">
-                                    </div>
-                                </div>
-                            </div>
-                            <div class="row">
-                                <div class="col-md-6">
-                                    <div class="mb-3">
                                         <label for="lastName" class="form-label">Last Name *</label>
                                         <input type="text" class="form-control" id="lastName" name="lastName" required>
                                     </div>
                                 </div>
+                            </div>
                                 <div class="col-md-6">
                                     <div class="mb-3">
                                         <label for="email" class="form-label">Email *</label>
@@ -385,19 +378,10 @@
                                     </div>
                                 </div>
                             </div>
-                            <div class="row">
-                                <div class="col-md-6">
-                                    <div class="mb-3">
-                                        <label for="studentStatus" class="form-label">Status</label>
-                                        <select class="form-select" id="studentStatus" name="studentStatus">
-                                            <option value="Active">Active</option>
-                                            <option value="Inactive">Inactive</option>
-                                            <option value="Graduated">Graduated</option>
-                                            <option value="Suspended">Suspended</option>
-                                        </select>
-                                    </div>
-                                </div>
-                            </div>
+                        </div>
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                            <button type="submit" class="btn btn-primary" onclick="saveStudent()">Save Student</button>
                         </div>
                     </form>
                 </div>

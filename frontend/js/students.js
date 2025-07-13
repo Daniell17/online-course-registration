@@ -87,12 +87,10 @@ class StudentManager {
         };
 
         setFieldValue('firstName', student.first_name);
-        setFieldValue('middleName', student.middle_name);
         setFieldValue('lastName', student.last_name);
         setFieldValue('email', student.email);
         setFieldValue('phone', student.phone);
         setFieldValue('dateOfBirth', student.date_of_birth);
-        setFieldValue('studentStatus', student.student_status || 'Active');
     }
 
     // Save student (create or update)
@@ -138,12 +136,10 @@ class StudentManager {
 
         return {
             firstName: getFieldValue('firstName'),
-            middleName: getFieldValue('middleName'),
             lastName: getFieldValue('lastName'),
             email: getFieldValue('email'),
             phone: getFieldValue('phone'),
-            dateOfBirth: getFieldValue('dateOfBirth') || null,
-            status: getFieldValue('studentStatus')
+            dateOfBirth: getFieldValue('dateOfBirth') || null
         };
     }
 
@@ -345,9 +341,6 @@ class StudentManager {
 }
 
 // Create global student manager instance
-const studentManager = new StudentManager();
-
-// Initialize student manager but don't create modals yet
 const studentManager = new StudentManager();
 
 // Initialize modals when DOM is loaded
