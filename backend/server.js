@@ -3,6 +3,7 @@ const cors = require('cors');
 const helmet = require('helmet');
 const morgan = require('morgan');
 const mysql = require('mysql2');
+const path = require('path');
 require('dotenv').config();
 
 const { testConnection } = require('./config/database');
@@ -56,6 +57,14 @@ app.use((error, req, res, next) => {
         message: error.message || 'Internal Server Error',
         ...(process.env.NODE_ENV === 'development' && { stack: error.stack })
     });
+});
+
+// Serve static files from frontend directory
+app.use(express.static(path.join(__dirname, '../frontend')));
+
+// Serve index.html for root route
+app.get('/', (req, res) => {
+    res.sendFile(path.join(__dirname, '../frontend/index.html'));
 });
 
 // 404 handler

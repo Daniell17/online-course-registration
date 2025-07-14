@@ -89,14 +89,8 @@ const studentController = {
     // /api/students/:id
     updateStudent: async (req, res) => {
         try {
-            console.log('UPDATE STUDENT REQUEST:', {
-                id: req.params.id,
-                body: req.body
-            });
-            
             const errors = validationResult(req);
             if (!errors.isEmpty()) {
-                console.log('Validation errors:', errors.array());
                 return res.status(400).json({
                     success: false,
                     message: 'Validation errors',
@@ -105,8 +99,6 @@ const studentController = {
             }
 
             const updated = await Student.update(req.params.id, req.body);
-            console.log('Student update result:', updated);
-            
             if (!updated) {
                 return res.status(404).json({
                     success: false,
@@ -115,15 +107,12 @@ const studentController = {
             }
 
             const updatedStudent = await Student.findById(req.params.id);
-            console.log('Updated student data:', updatedStudent);
-            
             res.json({
                 success: true,
                 message: 'Student updated successfully',
                 data: updatedStudent
             });
         } catch (error) {
-            console.error('Error updating student:', error);
             res.status(500).json({
                 success: false,
                 message: 'Error updating student',

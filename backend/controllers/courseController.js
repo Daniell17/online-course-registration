@@ -163,6 +163,50 @@ const courseController = {
                 error: error.message
             });
         }
+    },
+
+    // DELETE /api/courses/:id
+    deleteCourse: async (req, res) => {
+        try {
+            const courseId = req.params.id;
+            
+            // Check if course exists
+            const course = await Course.findById(courseId);
+            if (!course) {
+                return res.status(404).json({
+                    success: false,
+                    message: 'Course not found'
+                });
+            }
+
+            // Check if course has enrollments
+            const enrollmentCount = await Course.getEnrollmentCount(courseId);
+            if (enrollmentCount > 0) {
+                return res.status(400).json({
+                    success: false,
+                    message: 'Cannot delete course with existing enrollments'
+                });
+            }
+
+            const result = await Course.delete(courseId);
+            if (result.success) {
+                res.json({
+                    success: true,
+                    message: 'Course deleted successfully'
+                });
+            } else {
+                res.status(500).json({
+                    success: false,
+                    message: 'Error deleting course'
+                });
+            }
+        } catch (error) {
+            res.status(500).json({
+                success: false,
+                message: 'Error deleting course',
+                error: error.message
+            });
+        }
     }
 };
 

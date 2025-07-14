@@ -40,19 +40,13 @@ class Student {    static async findAll() {
     }
 
     static async update(id, studentData) {
-        console.log('Student.update called with:', { id, studentData });
-        
         const { firstName, lastName, email, phone, dateOfBirth } = studentData;
-        
-        console.log('Extracted fields:', { firstName, lastName, email, phone, dateOfBirth });
         
         const [result] = await pool.execute(`
             UPDATE Students 
             SET first_name = ?, last_name = ?, email = ?, phone = ?, date_of_birth = ?
             WHERE student_id = ?
         `, [firstName, lastName, email, phone || null, dateOfBirth || null, id]);
-        
-        console.log('Update query result:', result);
         
         return result.affectedRows > 0;
     }

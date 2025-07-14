@@ -7,17 +7,13 @@ document.addEventListener('DOMContentLoaded', async () => {
     console.log('Initializing Course Registration System...');
     
     try {
-        // Initialize student manager modals first
-        if (typeof studentManager !== 'undefined') {
-            studentManager.initializeModals();
-        }
-        
         await loadDashboardStats();
         await loadStudents();
         await loadCourses();
         await loadEnrollments();
         
         console.log('✅ Application initialized successfully');
+        
     } catch (error) {
         console.error('❌ Failed to initialize application:', error);
         showAlert('Failed to load application data. Please check if the backend server is running.', 'danger');
@@ -129,7 +125,13 @@ async function loadCourses() {
     try {
         const response = await api.getCourses();
         currentCourses = response.data;
-        renderCoursesTable();
+        // Use the new displayCourses function from courses.js
+        if (typeof displayCourses === 'function') {
+            displayCourses(currentCourses);
+        } else {
+            renderCoursesTable();
+        }
+        updateCourseStats(currentCourses);
     } catch (error) {
         console.error('Error loading courses:', error);
         showAlert('Failed to load courses', 'danger');

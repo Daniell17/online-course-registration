@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Fix Modal</title>
+</head>
+<body>
+    <h1>Modal Fix Page</h1>
+    <button onclick="fixModal()">Fix Stuck Modal</button>
+    
+    <script>
+        function fixModal() {
+            // Remove all modal backdrops
+            const backdrops = document.querySelectorAll('.modal-backdrop');
+            backdrops.forEach(backdrop => backdrop.remove());
+            
+            // Remove modal-open class from body
+            document.body.classList.remove('modal-open');
+            document.body.style.overflow = '';
+            document.body.style.paddingRight = '';
+            
+            alert('Modal should be fixed! Go back to main page.');
+        }
+        
+        // Auto-fix on load
+        setTimeout(fixModal, 1000);
+    </script>
+</body>
+</html>

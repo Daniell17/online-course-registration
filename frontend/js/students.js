@@ -4,68 +4,58 @@ class StudentManager {
         this.currentStudent = null;
         this.modal = null;
         this.detailsModal = null;
-        // Don't initialize modals in constructor
-    }
-
-    // Initialize modals when DOM is ready
-    initializeModals() {
-        const studentModalElement = document.getElementById('studentModal');
-        const detailsModalElement = document.getElementById('studentDetailsModal');
-        
-        if (studentModalElement) {
-            this.modal = new bootstrap.Modal(studentModalElement, {
-                backdrop: true,
-                keyboard: true,
-                focus: true
-            });
-            
-            studentModalElement.addEventListener('hidden.bs.modal', () => {
-                this.resetForm();
-            });
-        }
-        
-        if (detailsModalElement) {
-            this.detailsModal = new bootstrap.Modal(detailsModalElement, {
-                backdrop: true,
-                keyboard: true,
-                focus: true
-            });
-        }
     }
 
     // Show add student modal
     showAddModal() {
-        // Initialize modals if not already done
-        if (!this.modal) {
-            this.initializeModals();
-        }
-        
         this.currentStudent = null;
         document.getElementById('studentModalLabel').textContent = 'Add New Student';
         this.resetForm();
         
-        if (this.modal) {
-            this.modal.show();
-        } else {
-            console.error('Could not initialize modal');
-        }
+        // Use Bootstrap's direct modal API
+        const modalElement = document.getElementById('studentModal');
+        const modal = new bootstrap.Modal(modalElement, {
+            backdrop: true,
+            keyboard: true,
+            focus: true
+        });
+        
+        modal.show();
+        
+        // Store the modal instance for cleanup
+        this.modal = modal;
     }
 
     // Show edit student modal
     async showEditModal(studentId) {
         try {
+            console.log(`Loading student data for ID: ${studentId}`);
             const response = await api.getStudent(studentId);
             this.currentStudent = response.data;
             
+            console.log('Student data loaded:', this.currentStudent);
+            
+            // Update modal title and populate form
             document.getElementById('studentModalLabel').textContent = 'Edit Student';
             this.populateForm(this.currentStudent);
             
-            if (this.modal) {
-                this.modal.show();
-            }
+            // Use Bootstrap's direct modal API instead of stored instance
+            const modalElement = document.getElementById('studentModal');
+            const modal = new bootstrap.Modal(modalElement, {
+                backdrop: true,
+                keyboard: true,
+                focus: true
+            });
+            
+            console.log('Showing edit modal');
+            modal.show();
+            
+            // Store the modal instance for cleanup
+            this.modal = modal;
+            
         } catch (error) {
-            showAlert('Failed to load student data', 'danger');
-            console.error('Error loading student:', error);
+            console.error('Error in showEditModal:', error);
+            showAlert('Failed to load student data: ' + error.message, 'danger');
         }
     }
 
@@ -343,11 +333,6 @@ class StudentManager {
 // Create global student manager instance
 const studentManager = new StudentManager();
 
-// Initialize modals when DOM is loaded
-document.addEventListener('DOMContentLoaded', () => {
-    studentManager.initializeModals();
-});
-
 // Global functions that use the student manager
 function showAddStudentModal() {
     studentManager.showAddModal();
@@ -387,3 +372,29 @@ function closeStudentDetailsModal() {
         studentManager.detailsModal.hide();
     }
 }
+
+// Force close all modals and remove backdrops - useful for debugging
+function forceCloseAllModals() {
+    // Close Bootstrap modals
+    const modals = document.querySelectorAll('.modal');
+    modals.forEach(modal => {
+        const modalInstance = bootstrap.Modal.getInstance(modal);
+        if (modalInstance) {
+            modalInstance.hide();
+        }
+    });
+    
+    // Remove any stuck backdrops
+    const backdrops = document.querySelectorAll('.modal-backdrop');
+    backdrops.forEach(backdrop => backdrop.remove());
+    
+    // Remove modal-open class from body
+    document.body.classList.remove('modal-open');
+    document.body.style.overflow = '';
+    document.body.style.paddingRight = '';
+    
+    console.log('All modals forcefully closed');
+}
+
+// Make it globally available for debugging
+window.forceCloseAllModals = forceCloseAllModals;

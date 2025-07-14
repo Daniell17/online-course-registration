@@ -11,16 +11,16 @@ const studentValidation = [
     body('firstName').notEmpty().withMessage('First name is required'),
     body('lastName').notEmpty().withMessage('Last name is required'),
     body('email').isEmail().withMessage('Valid email is required'),
-    body('phone').optional().isMobilePhone(),
+    body('phone').optional().matches(/^[\+]?[0-9\s\-\(\)]{7,15}$/).withMessage('Phone number must be 7-15 digits, may include +, spaces, hyphens, and parentheses'),
     body('dateOfBirth').optional().isDate()
 ];
 
 const courseValidation = [
     body('courseName').notEmpty().withMessage('Course name is required'),
     body('courseCode').notEmpty().withMessage('Course code is required'),
-    body('credits').isInt({ min: 1, max: 6 }).withMessage('Credits must be between 1 and 6'),
+    body('credits').isInt({ min: 1, max: 10 }).withMessage('Credits must be between 1 and 10'),
     body('price').isFloat({ min: 0 }).withMessage('Price must be positive'),
-    body('maxStudents').isInt({ min: 1 }).withMessage('Max students must be positive')
+    body('maxStudents').optional().isInt({ min: 1 }).withMessage('Max students must be positive')
 ];
 
 // Student Routes
@@ -37,6 +37,7 @@ router.get('/courses', courseController.getAllCourses);
 router.get('/courses/:id', courseController.getCourseById);
 router.post('/courses', courseValidation, courseController.createCourse);
 router.put('/courses/:id', courseValidation, courseController.updateCourse);
+router.delete('/courses/:id', courseController.deleteCourse);
 router.get('/courses/:id/report', courseController.getCourseReport);
 router.post('/courses/:id/enroll', courseController.enrollStudent);
 

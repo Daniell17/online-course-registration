@@ -101,6 +101,26 @@ class Course {    static async findAll(filters = {}) {
             throw error;
         }
     }
+
+    static async getEnrollmentCount(courseId) {
+        const [rows] = await pool.execute(`
+            SELECT COUNT(*) as enrollment_count 
+            FROM Enrollments 
+            WHERE course_id = ? AND status IN ('Enrolled', 'Completed')
+        `, [courseId]);
+        return rows[0].enrollment_count;
+    }
+
+    static async delete(courseId) {
+        try {
+            const [result] = await pool.execute(`
+                DELETE FROM Courses WHERE course_id = ?
+            `, [courseId]);
+            return { success: result.affectedRows > 0 };
+        } catch (error) {
+            return { success: false, error: error.message };
+        }
+    }
 }
 
 module.exports = Course;
